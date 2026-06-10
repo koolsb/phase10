@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+| Phase 10 brand palette
+| Card blue + the four deck colors (red / blue / green / yellow).
+*/
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-phase-blue: #0a4ea8;
+    --color-phase-blue-deep: #073a7d;
+    --color-phase-red: #e63329;
+    --color-phase-green: #2faa4d;
+    --color-phase-yellow: #f6c213;
+
+    --color-accent: var(--color-phase-blue);
+    --color-accent-content: var(--color-phase-blue);
+    --color-accent-foreground: var(--color-white);
+}
+
+@layer theme {
+    .dark {
+        --color-accent: #3b82f6;
+        --color-accent-content: #93c5fd;
+        --color-accent-foreground: var(--color-white);
+    }
+}
+
+/* The signature multi-color stripe along the bottom of a Phase 10 card. */
+@utility phase10-stripe {
+    background: linear-gradient(
+        90deg,
+        var(--color-phase-red) 0% 25%,
+        var(--color-phase-blue) 25% 50%,
+        var(--color-phase-green) 50% 75%,
+        var(--color-phase-yellow) 75% 100%
+    );
+}
+
+/* The card body itself — rich Mattel blue with a subtle sheen. */
+@utility phase10-card-bg {
+    background: linear-gradient(160deg, var(--color-phase-blue) 0%, var(--color-phase-blue-deep) 100%);
+}
