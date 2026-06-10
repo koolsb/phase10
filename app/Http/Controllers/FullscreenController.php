@@ -23,6 +23,7 @@ class FullscreenController extends Controller
         return view('fullscreen', [
             'phases' => $phases,
             'title' => $request->query('title', 'Phase 10'),
+            'backUrl' => url()->previous(route('phases.generator')),
         ]);
     }
 }

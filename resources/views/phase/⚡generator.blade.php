@@ -295,7 +295,7 @@ new class extends Component
             <flux:button variant="subtle" icon="plus" wire:click="generateOne">Add one phase</flux:button>
 
             @if ($generated && count($this->phases))
-                <flux:button :href="$this->fullscreenUrl()" target="_blank" variant="subtle" icon="arrows-pointing-out">
+                <flux:button :href="$this->fullscreenUrl()" variant="subtle" icon="arrows-pointing-out">
                     Full screen
                 </flux:button>
                 <flux:button :href="$this->printUrl()" target="_blank" variant="subtle" icon="printer">

@@ -23,6 +23,7 @@ class PrintController extends Controller
         return view('print', [
             'phases' => $phases,
             'title' => $request->query('title', 'Phase 10'),
+            'backUrl' => url()->previous(route('phases.generator')),
         ]);
     }
 }

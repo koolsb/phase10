@@ -33,7 +33,7 @@
     </head>
     <body class="min-h-full bg-zinc-100 dark:bg-zinc-100">
         <div class="no-print sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-3">
-            <a href="{{ route('phases.generator') }}" class="text-sm font-semibold text-zinc-600 hover:text-zinc-900">
+            <a href="{{ $backUrl }}" class="text-sm font-semibold text-zinc-600 hover:text-zinc-900">
                 ← Back to generator
             </a>
             <button

@@ -21,7 +21,7 @@
         {{-- Floating controls --}}
         <div class="fixed top-0 right-0 left-0 z-50 flex items-center justify-between px-5 py-4">
             <a
-                href="{{ route('phases.generator') }}"
+                href="{{ $backUrl }}"
                 class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/70 backdrop-blur-sm transition hover:bg-white/20 hover:text-white"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5" aria-hidden="true">
@@ -51,7 +51,7 @@
         </div>
 
         {{-- Card --}}
-        <div class="flex h-full items-center justify-center overflow-y-auto px-6 pb-6 pt-20">
+        <div class="flex h-full items-center justify-center overflow-y-auto px-3 pb-4 pt-16 sm:px-6 sm:pb-6 sm:pt-20">
             @if (count($phases))
                 <div class="w-full max-w-4xl">
                     <x-phase-card :phases="$phases" :title="$title" :show-bands="true" size="xl" />
