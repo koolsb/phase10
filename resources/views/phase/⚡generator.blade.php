@@ -111,11 +111,6 @@ new class extends Component
         return route('phases.print', ['phases' => implode(',', $this->signatures)]);
     }
 
-    public function fullscreenUrl(): string
-    {
-        return route('phases.fullscreen', ['phases' => implode(',', $this->signatures)]);
-    }
-
     #[Computed]
     public function phases(): array
     {
@@ -203,7 +198,43 @@ new class extends Component
     }
 }; ?>
 
-<div class="space-y-8">
+<div
+    x-data="{
+        fullscreen: false,
+        wlActive: false,
+        wlLock: null,
+        wlSupported: 'wakeLock' in navigator,
+        init() {
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible' && this.wlActive && !this.wlLock) {
+                    await this.wlAcquire();
+                }
+            });
+        },
+        async wlAcquire() {
+            try {
+                this.wlLock = await navigator.wakeLock.request('screen');
+                this.wlLock.addEventListener('release', () => { this.wlLock = null; this.wlActive = false; });
+                this.wlActive = true;
+            } catch(e) { this.wlActive = false; }
+        },
+        async wlToggle() {
+            if (!this.wlSupported) return;
+            if (this.wlActive) {
+                await this.wlLock?.release();
+                this.wlLock = null;
+                this.wlActive = false;
+            } else {
+                await this.wlAcquire();
+            }
+        },
+        async closeFullscreen() {
+            if (this.wlActive) { await this.wlLock?.release(); this.wlLock = null; this.wlActive = false; }
+            this.fullscreen = false;
+        }
+    }"
+    class="space-y-8"
+>
     <div class="space-y-2">
         <flux:heading size="xl" class="font-black">Generate a Phase 10 game</flux:heading>
         <flux:text>
@@ -295,7 +326,7 @@ new class extends Component
             <flux:button variant="subtle" icon="plus" wire:click="generateOne">Add one phase</flux:button>
 
             @if ($generated && count($this->phases))
-                <flux:button :href="$this->fullscreenUrl()" variant="subtle" icon="arrows-pointing-out">
+                <flux:button @click="fullscreen = true" variant="subtle" icon="arrows-pointing-out">
                     Full screen
                 </flux:button>
                 <flux:button :href="$this->printUrl()" target="_blank" variant="subtle" icon="printer">
@@ -353,4 +384,55 @@ new class extends Component
             <flux:text>No phases yet — hit <span class="font-semibold">Generate</span> to build a game.</flux:text>
         </div>
     @endif
+
+    {{-- Fullscreen overlay — Alpine-controlled, no navigation, state is never lost --}}
+    <div
+        x-show="fullscreen"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        @keydown.escape.window="closeFullscreen()"
+        class="fixed inset-0 z-50 overflow-y-auto bg-phase-blue-deep"
+        style="display: none"
+    >
+        {{-- Controls bar --}}
+        <div class="fixed left-0 right-0 top-0 z-10 flex items-center justify-between px-5 py-4">
+            <button
+                type="button"
+                @click="closeFullscreen()"
+                class="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/70 backdrop-blur-sm transition hover:bg-white/20 hover:text-white"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close
+            </button>
+
+            <button
+                type="button"
+                @click="wlToggle()"
+                :title="wlActive ? 'Screen is awake' : 'Keep screen awake'"
+                :class="wlActive ? 'bg-white/25 text-white' : 'bg-white/10 text-white/70'"
+                class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium backdrop-blur-sm transition hover:bg-white/20 hover:text-white"
+            >
+                <svg x-show="!wlActive" xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 26 26" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75 9.75 9.75 0 0 1 8.25 6a9.72 9.72 0 0 1 .752-3.752 9.75 9.75 0 0 0-10.978 10.44 9.75 9.75 0 0 0 10.296 8.802A9.754 9.754 0 0 0 21.752 15.002Z" />
+                </svg>
+                <svg x-show="wlActive" xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 26 26" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+                <span x-text="wlActive ? 'Screen awake' : 'Keep awake'"></span>
+            </button>
+        </div>
+
+        {{-- Card --}}
+        <div class="flex min-h-screen items-center justify-center px-3 pb-4 pt-16 sm:px-6 sm:pb-6 sm:pt-20">
+            <div class="w-full max-w-4xl">
+                <x-phase-card :phases="$this->phases" title="Phase 10" :show-bands="true" size="xl" />
+            </div>
+        </div>
+    </div>
 </div>
